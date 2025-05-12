@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Parking System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; display: flex; }
+        header { background: #333; color: white; padding: 20px; text-align: center; font-size: 24px; width: 100%; }
+        nav { display: flex; justify-content: center; background: #444; padding: 15px; width: 100%; }
+        nav a { color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        nav a:hover { background: #ff9800; border-radius: 5px; }
+        .container { padding: 40px 20px; text-align: center; max-width: 800px; margin: auto; flex-grow: 1; }
+        .intro { font-size: 18px; line-height: 1.6; margin-bottom: 30px; }
+        .cta { margin-top: 30px; padding: 15px 25px; background: #ff9800; color: white; text-decoration: none; font-size: 18px; border-radius: 5px; display: inline-block; transition: 0.3s; }
+        .cta:hover { background: #e68900; }
+        footer { background: #222; color: white; text-align: center; padding: 15px; margin-top: 40px; font-size: 14px; width: 100%; }
+        .side-panel { width: 300px; background: #fff; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .side-panel h3 { color: #ff9800; }
+    </style>
+    <script>
+        function updateAvailableSpaces() {
+            let date = document.getElementById("date").value;
+            let spaceDropdown = document.getElementById("space");
+            spaceDropdown.innerHTML = "";
+            
+            let availableSpaces = [];
+            for (let i = 1; i <= 100; i++) {
+                if (Math.random() > 0.3) {
+                    availableSpaces.push(i);
+                }
+            }
+            
+            availableSpaces.forEach(space => {
+                let option = document.createElement("option");
+                option.value = space;
+                option.textContent = `Space ${space}`;
+                spaceDropdown.appendChild(option);
+            });
+        }
+        
+        function calculateFee() {
+            let park = document.getElementById("park").value;
+            let space = parseInt(document.getElementById("space").value);
+            let date = new Date(document.getElementById("date").value);
+            let vehicle = document.getElementById("vehicle").value;
+            
+            let basePrice = { A: 5000, B: 4000, C: 3000, D: 3000 }[park];
+            if (space <= 50) basePrice += 1000;
+            if (date.getDay() === 0 || date.getDay() === 6) basePrice += 1000;
+            let vehicleCharge = { small: 1000, medium: 2000, large: 3000 }[vehicle];
+            
+            let totalFee = basePrice + vehicleCharge;
+            document.getElementById("fee").textContent = `Total Fee: ₦${totalFee.toFixed(2)}`;
+
+            document.cookie = "total_fee=" + totalFee;
+            
+            document.getElementById("breakdown").innerHTML = `
+                <p>Base price for Park ${park}: ₦${basePrice}</p>
+                <p>${space <= 50 ? "Premium space charge: ₦1000" : "No premium space extra charge"}</p>
+                <p>${(date.getDay() === 0 || date.getDay() === 6) ? "Weekend surcharge: ₦1000" : "No weekend surcharge"}</p>
+                <p>Vehicle type charge (${vehicle}): ₦${vehicleCharge}</p>
+                <h3>Total: ₦${totalFee.toFixed(2)}</h3>
+            `;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pre-Parking System</h1>
+        </header>
+        
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="login.html">Logout</a>
+        </nav>
+        
+        <h2>Reserve Your Parking Spot</h2>
+        <p class="intro">Choose an available parking space below and confirm your reservation.</p>
+        
+        <form action="reserve_process.php" method="POST">
+            <label for="park">Select Parking Area:</label>
+            <select name="park" id="park" required>
+                <option value="A">Park A</option>
+                <option value="B">Park B</option>
+                <option value="C">Park C</option>
+                <option value="D">Park D</option>
+            </select>
+            <br><br>
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" required onchange="updateAvailableSpaces()">
+            <br><br>
+            <label for="space">Select Available Parking Space:</label>
+            <select name="space" id="space" required onchange="calculateFee()">
+                <option>Select a date first</option>
+            </select>
+            <br><br>
+            <label for="vehicle">Select Vehicle Size:</label>
+            <select name="vehicle" id="vehicle" required onchange="calculateFee()">
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+            </select>
+            <br><br>
+            <p id="fee">Total Fee: ₦0.00</p>
+           
+            <button type="submit" class="cta">Generate Ticket</button>
+        </form>
+    </div>
+    
+    <div class="side-panel">
+        <h3>Fee Breakdown</h3>
+        <div id="breakdown">
+            <p>Select options to see the breakdown.</p>
+        </div>
+    </div>
+</body>
+</html>
